@@ -1,0 +1,52 @@
+<script lang="ts">
+import {defineComponent, h, onMounted, onBeforeUnmount, inject, watch, PropType} from "vue";
+import mapboxgl from "mapbox-gl";
+import MapboxKey from "@/composables/MapboxKey";
+
+function createMarker(lngLat: mapboxgl.LngLat, text: string, offset = 20): mapboxgl.Marker {
+  const popup = new mapboxgl.Popup({offset: offset}).setText(text);
+  const marker = new mapboxgl.Marker().setLngLat(lngLat).setPopup(popup);
+  marker.getElement().addEventListener('click', function (e) {
+    e.stopPropagation()
+    marker.togglePopup()
+  });
+  return marker;
+}
+
+export default defineComponent({
+  props: {
+    lngLat: {
+      type: mapboxgl.LngLat as PropType<mapboxgl.LngLat>,
+      required: true
+    },
+    text: {
+      type: String as PropType<string>,
+      default: ""
+    }
+  },
+  setup(props) {
+    let marker = createMarker(props.lngLat, props.text);
+    const map = inject(MapboxKey);
+
+    watch(() => props.lngLat, (newVal) => {
+      marker.remove();
+      marker = createMarker(newVal, props.text);
+      if (map && map.value) marker.addTo(map.value);
+    });
+
+    onMounted(() => {
+      if (map && map.value) marker.addTo(map.value);
+    });
+
+    onBeforeUnmount(() => {
+      marker.remove();
+    })
+
+    return () => h("div", {
+      style: {
+        display: "none"
+      }
+    });
+  },
+});
+</script>

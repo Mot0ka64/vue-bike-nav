@@ -1,5 +1,5 @@
 <template>
-  <MyMap/>
+  <Home/>
 </template>
 
 <style>
@@ -20,13 +20,16 @@
   color: #42b983;
 }
 </style>
-<script>
-import {Options, Vue} from 'vue-class-component';
-import MyMap from "@/components/MyMap.vue";
 
-@Options({
-  components: {MyMap},
+<script>
+import 'normalize.css'
+
+import {defineComponent} from "vue";
+import Home from "@/views/Home.vue";
+
+export default defineComponent({
+  components:{
+    Home
+  }
 })
-export default class App extends Vue {
-}
 </script>
