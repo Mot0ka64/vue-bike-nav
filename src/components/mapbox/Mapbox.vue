@@ -13,9 +13,10 @@ import MapboxKey from "@/composables/MapboxKey";
 export default defineComponent({
   name: 'Mapbox',
   props: {},
-  emits:["map-click"],
+  emits: ["map-click"],
   setup(props, context: SetupContext) {
     const map = ref<mapboxgl.Map | null>(null)
+
     const options: mapboxgl.MapboxOptions = {
       accessToken: process.env.VUE_APP_MAPBOX_TOKEN,
       container: "map",
@@ -32,8 +33,7 @@ export default defineComponent({
       });
     });
   },
-})
-;
+});
 </script>
 
 <style scoped>
