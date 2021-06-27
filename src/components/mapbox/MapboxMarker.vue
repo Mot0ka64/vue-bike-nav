@@ -14,13 +14,15 @@ export default defineComponent({
       default: ""
     }
   },
-  setup(props) {
+  emits: ["click"],
+  setup(props, context) {
     const createMarker = (lngLat: mapboxgl.LngLat, text: string, offset = 20) => {
       const popup = new mapboxgl.Popup({offset: offset}).setText(text);
       const marker = new mapboxgl.Marker().setLngLat(lngLat).setPopup(popup);
       marker.getElement().addEventListener('click', function (e) {
-        e.stopPropagation()
-        marker.togglePopup()
+        e.stopPropagation();
+        marker.togglePopup();
+        context.emit("click", marker.getPopup().isOpen());
       });
       return marker;
     }

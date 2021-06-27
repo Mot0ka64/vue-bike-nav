@@ -14,8 +14,8 @@ export default defineComponent({
       required: true
     }
   },
-
-  setup(props) {
+  emits: ["click"],
+  setup(props, context) {
     const map = inject(MapboxKey);
 
     const attachGeoJson = (map: mapboxgl.Map, coordinates: Array<Array<number>>, id: string) => {
@@ -44,6 +44,9 @@ export default defineComponent({
           'line-width': 4
         }
       });
+      map.on("click", id, () => {
+        context.emit("click", true)
+      })
     }
 
     const detachGeoJson = (map: mapboxgl.Map, id: string) => {

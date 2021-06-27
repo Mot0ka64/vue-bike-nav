@@ -24,23 +24,26 @@ export default defineComponent({
       center: new mapboxgl.LngLat(139.8, 35.75),
       zoom: 10
     }
-    provide(MapboxKey, map)
+    provide(MapboxKey, map);
 
     onMounted(() => {
       map.value = new mapboxgl.Map(options);
       map.value.on("click", (e) => {
-        context.emit("map-click", e)
+        const features = map.value?.queryRenderedFeatures(e.point)
+        if (features && (features.length == 0 || features.every(f => (f.source == "road" || f.source == "composite")))) {
+          context.emit("map-click", e);
+        }
       });
     });
   },
-});
+})
+;
 </script>
 
 <style scoped>
 #map {
   position: absolute;
-  top: 0;
-  bottom: 0;
   width: 100%;
+  height: 100%;
 }
 </style>
