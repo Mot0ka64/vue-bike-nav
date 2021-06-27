@@ -29,7 +29,7 @@ export default defineComponent({
   emits: ["located"],
   setup(props, context) {
     const map = inject(MapboxKey);
-    console.log(props)
+    // console.log(props)
     const geolocate = new mapboxgl.GeolocateControl({
       fitBoundsOptions: {
         maxZoom: props.maxZoom
