@@ -56,13 +56,14 @@ export default defineComponent({
       }
     }
 
-    if (map) {
-      watch(props.coordinates, () => {
+    watch(() => props.coordinates, () => {
+      if (map) {
         if (map.value) {
           attachGeoJson(map.value, props.coordinates, props.id)
         }
-      })
-    }
+      }
+    });
+
 
     onMounted(() => {
       if (map?.value) attachGeoJson(map.value, props.coordinates, props.id);
