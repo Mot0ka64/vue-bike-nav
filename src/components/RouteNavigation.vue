@@ -5,6 +5,7 @@
     </svg>
     <h3 class="description">{{ description }} へ</h3>
     <h3 class="rem-dist-on-step">{{ remDistOnStep.toFixed(1) }} m</h3>
+    <h4 class="dest-description">目的地まで</h4>
     <h4 class="rem-dist">{{ (remDist / 1e3).toFixed(2) }} km</h4>
   </div>
 </template>
@@ -79,5 +80,46 @@ export default defineComponent({
   width: 100px;
   left: 10px;
   transform: var(--bearing);
+}
+
+.dest-description {
+  display: none;
+}
+
+@media all and (orientation: landscape) {
+  .navigation-container {
+    bottom: 20px;
+    width: 120px;
+    height: auto;
+  }
+
+  .description {
+    top: 90px;
+    left: 10px;
+    right: auto;
+  }
+
+  .rem-dist-on-step {
+    left: 10px;
+    top: 130px;
+    bottom: auto;
+  }
+
+  .rem-dist {
+    right: 10px;
+    bottom: 0;
+    font-size: 120%;
+  }
+
+  .arrow {
+    left: 0;
+  }
+
+  .dest-description {
+    display: block;
+    position: absolute;
+    bottom: 40px;
+    left: 10px;
+  }
 }
 </style>

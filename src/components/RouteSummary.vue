@@ -46,4 +46,18 @@ export default defineComponent({
   text-align: left;
   margin-left: 40px;
 }
+
+@media all and (orientation: landscape) {
+  .summary-container {
+    height: 50px;
+  }
+  .summary {
+    position: absolute;
+    left: 20px;
+  }
+  .distance {
+    position: absolute;
+    right: 100px;
+  }
+}
 </style>
