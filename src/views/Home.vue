@@ -3,10 +3,14 @@
     <Mapbox @map-click="onMapClick">
       <MapboxMarker v-if="lngLat" :lng-lat="lngLat" :text="markerText" @click="onLayerClick"/>
       <MapboxGeoJsonSource v-if="routeResults" :coordinates="coordinates" id="route" @click="onLayerClick"/>
-      <MapboxGeolocation @located="onLocation" :track-user-location="false" :max-zoom="11"/>
+      <MapboxGeolocation @located="onLocation" :track-user-location="true" :max-zoom="11"/>
     </Mapbox>
     <transition name="route-summary">
       <RouteSummary v-if="uiState === 'Summary'" :summary="summaryText" :distance="distance"/>
+    </transition>
+    <transition name="route-navigation">
+      <RouteNavigation v-if="uiState === 'Navigation'" :description="navDescription" :remDist="navRemDist"
+                       :remDistOnStep="navRemDistOnStep" :bearing="navBearing"/>
     </transition>
     <FloatingActionButton color="teal" bottom="40px" @clicked="onFabClick" :uiState="uiState"/>
   </div>
@@ -24,9 +28,12 @@ import RouteSummary from "@/components/RouteSummary.vue";
 import fetchCycleRoute from "@/composables/CycleRoute";
 import {RouteResults} from "osrm";
 import {UiState} from "@/composables/UiState";
+import RouteManager from "@/composables/RouteManager";
+import RouteNavigation from "@/components/RouteNavigation.vue";
 
 export default defineComponent({
   components: {
+    RouteNavigation,
     FloatingActionButton,
     MapboxGeoJsonSource,
     MapboxGeolocation,
@@ -42,6 +49,13 @@ export default defineComponent({
     const markerText = ref("");
     const uiState = ref<UiState>("Search");
 
+    const navDescription = ref("");
+    const navRemDistOnStep = ref(0.0);
+    const navRemDist = ref(0.0);
+    const navBearing = ref(0.0);
+
+    let routeManager: RouteManager | null = null;
+
     const onMapClick = (e: MapMouseEvent) => {
       uiState.value = "Search";
       if (window.confirm(`[${e.lngLat.lng.toFixed(6)}, ${e.lngLat.lat.toFixed(6)}] に変更しますか？`)) {
@@ -52,16 +66,41 @@ export default defineComponent({
 
     // eslint-disable-next-line no-undef
     const onLocation = (position: GeolocationPosition) => {
-      location.value = new mapboxgl.LngLat(position.coords.longitude, position.coords.latitude)
+      location.value = new mapboxgl.LngLat(position.coords.longitude, position.coords.latitude);
+      if (uiState.value === "Navigation") {
+        updateLocation();
+        if (!routeManager || !routeManager.onNavigation) uiState.value = "Summary";
+      }
     }
 
     const onFabClick = () => {
-      console.log("clicked");
+      switch (uiState.value) {
+        case "Search":
+          break;
+        case "Summary":
+          if (routeResults.value) routeManager = new RouteManager(routeResults.value.routes[routeIndex.value]);
+          updateLocation();
+          uiState.value = "Navigation";
+          break;
+        case "Navigation":
+          uiState.value = "Summary";
+          break;
+      }
     }
 
     const onLayerClick = (bool: boolean) => {
       if (uiState.value === "Search" && bool) uiState.value = "Summary";
       if (uiState.value === "Summary" && (!bool)) uiState.value = "Search";
+    }
+
+    function updateLocation() {
+      if (location.value) {
+        routeManager?.updateLocation(location.value);
+        navDescription.value = routeManager?.nextDescription() ?? "";
+        navRemDist.value = routeManager?.remainingDistance() ?? 0.0;
+        navRemDistOnStep.value = routeManager?.remainingDistanceOnStep() ?? 0.0;
+        navBearing.value = routeManager?.nextBearing() ?? 0.0;
+      }
     }
 
     watch(lngLat, () => {
@@ -87,23 +126,15 @@ export default defineComponent({
     const distance = computed(() => route.value?.distance ?? 0);
 
     const coordinates = computed(() => {
-      let points: number[][] = [];
-      if (route.value) {
-        points = points.concat(route.value.legs.flatMap(leg => leg.steps).flatMap(step => {
-          if (typeof step.geometry != "string") {
-            return step.geometry.coordinates;
-          } else {
-            return [];
-          }
-        }));
-      }
-      return points;
+      if (route.value) return RouteManager.getAllWaypoints(route.value);
+      else return [];
     });
 
     return {
       onMapClick, onLocation, onFabClick, onLayerClick,
       lngLat, markerText, location, routeResults, uiState,
-      summaryText, coordinates, distance
+      summaryText, coordinates, distance,
+      navRemDist, navRemDistOnStep, navDescription, navBearing
     };
   }
 })
@@ -128,12 +159,16 @@ body {
 }
 
 .route-summary-enter-active,
-.route-summary-leave-active {
+.route-summary-leave-active,
+.route-navigation-enter-active,
+.route-navigation-leave-active {
   transition: all 0.5s ease;
 }
 
 .route-summary-enter-from,
-.route-summary-leave-to {
+.route-summary-leave-to,
+.route-navigation-enter-from,
+.route-navigation-leave-to {
   opacity: 0;
 }
 </style>
