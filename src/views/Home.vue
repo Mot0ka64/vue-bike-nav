@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <Mapbox @map-click="onMapClick">
+    <Mapbox @context-menu="onMapClick">
       <MapboxMarker v-if="lngLat" :lng-lat="lngLat" :text="markerText" @click="onLayerClick"/>
       <MapboxGeoJsonSource v-if="routeResults" :coordinates="coordinates" id="route" @click="onLayerClick"/>
       <MapboxGeolocation @located="onLocation" :track-user-location="true" :max-zoom="11"/>

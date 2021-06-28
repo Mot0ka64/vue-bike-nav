@@ -13,7 +13,7 @@ import MapboxKey from "@/composables/MapboxKey";
 export default defineComponent({
   name: 'Mapbox',
   props: {},
-  emits: ["map-click"],
+  emits: ["context-menu"],
   setup(props, context: SetupContext) {
     const map = ref<mapboxgl.Map | null>(null)
 
@@ -28,12 +28,15 @@ export default defineComponent({
 
     onMounted(() => {
       map.value = new mapboxgl.Map(options);
-      map.value.on("click", (e) => {
+      /*map.value.on("click", (e) => {
         const features = map.value?.queryRenderedFeatures(e.point)
         if (features && (features.length == 0 || features.every(f => (f.source == "road" || f.source == "composite")))) {
           context.emit("map-click", e);
         }
-      });
+      });*/
+      map.value.on("contextmenu", (e) => {
+        context.emit("context-menu", e);
+      })
     });
   },
 })
