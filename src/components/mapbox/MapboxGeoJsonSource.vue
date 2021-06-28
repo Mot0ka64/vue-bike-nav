@@ -1,5 +1,5 @@
 <script lang="ts">
-import {defineComponent, h, inject, onBeforeUnmount, onMounted, PropType, watchEffect} from "vue";
+import {defineComponent, h, inject, onBeforeUnmount, onMounted, PropType, watch} from "vue";
 import MapboxKey from "@/composables/MapboxKey";
 import mapboxgl from "mapbox-gl";
 
@@ -57,7 +57,7 @@ export default defineComponent({
     }
 
     if (map) {
-      watchEffect(() => {
+      watch(props.coordinates, () => {
         if (map.value) {
           attachGeoJson(map.value, props.coordinates, props.id)
         }
