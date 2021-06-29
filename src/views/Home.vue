@@ -6,11 +6,10 @@
       <MapboxGeolocation @located="onLocation" :track-user-location="true" :max-zoom="11"/>
     </Mapbox>
     <transition name="route-summary">
-      <RouteSummary v-if="uiState === 'Summary'" :summary="summaryText" :distance="distance"/>
+      <RouteSummary v-if="uiState === 'Summary'" :data="summaryData"/>
     </transition>
     <transition name="route-navigation">
-      <RouteNavigation v-if="uiState === 'Navigation'" :description="navDescription" :remDist="navRemDist"
-                       :remDistOnStep="navRemDistOnStep" :bearing="navBearing"/>
+      <RouteNavigation v-if="uiState === 'Navigation'" :data="navData"/>
     </transition>
     <FloatingActionButton color="teal" bottom="40px" @clicked="onFabClick" :uiState="uiState"/>
   </div>
@@ -27,7 +26,7 @@ import FloatingActionButton from "@/components/ui/FloatingActionButton.vue";
 import RouteSummary from "@/components/RouteSummary.vue";
 import fetchCycleRoute from "@/composables/CycleRoute";
 import {RouteResults} from "osrm";
-import {UiState} from "@/composables/UiState";
+import {NavigationData, SummaryData, UiState} from "@/composables/UiType";
 import RouteManager from "@/composables/RouteManager";
 import RouteNavigation from "@/components/RouteNavigation.vue";
 
@@ -49,10 +48,12 @@ export default defineComponent({
     const markerText = ref("");
     const uiState = ref<UiState>("Search");
 
-    const navDescription = ref("");
-    const navRemDistOnStep = ref(0.0);
-    const navRemDist = ref(0.0);
-    const navBearing = ref(0.0);
+    const navData = ref<NavigationData>({
+      description: "",
+      remainingDistanceOnStep: 0.0,
+      remainingDistance: 0.0,
+      bearing: 0.0
+    });
 
     let routeManager: RouteManager | null = null;
 
@@ -96,10 +97,12 @@ export default defineComponent({
     function updateLocation() {
       if (location.value) {
         routeManager?.updateLocation(location.value);
-        navDescription.value = routeManager?.nextDescription() ?? "";
-        navRemDist.value = routeManager?.remainingDistance() ?? 0.0;
-        navRemDistOnStep.value = routeManager?.remainingDistanceOnStep() ?? 0.0;
-        navBearing.value = routeManager?.nextBearing() ?? 0.0;
+        navData.value = {
+          description: routeManager?.nextDescription() ?? "",
+          remainingDistance: routeManager?.remainingDistance() ?? 0.0,
+          remainingDistanceOnStep: routeManager?.remainingDistanceOnStep() ?? 0.0,
+          bearing: routeManager?.nextBearing() ?? 0.0
+        }
       }
     }
 
@@ -119,11 +122,10 @@ export default defineComponent({
       return routeResults.value?.routes[routeIndex.value];
     });
 
-    const summaryText = computed(() => {
-      return route.value?.legs?.map(leg => leg.summary).join(",") ?? "";
-    });
-
-    const distance = computed(() => route.value?.distance ?? 0);
+    const summaryData = computed<SummaryData>( () => ({
+      summary: route.value?.legs?.map(leg => leg.summary).join(",") ?? "",
+      distance: route.value?.distance ?? 0
+    }));
 
     const coordinates = computed(() => {
       if (route.value) return RouteManager.getAllWaypoints(route.value);
@@ -133,8 +135,8 @@ export default defineComponent({
     return {
       onMapClick, onLocation, onFabClick, onLayerClick,
       lngLat, markerText, location, routeResults, uiState,
-      summaryText, coordinates, distance,
-      navRemDist, navRemDistOnStep, navDescription, navBearing
+      summaryData, coordinates, navData,
+      
     };
   }
 })

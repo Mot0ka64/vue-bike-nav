@@ -12,7 +12,7 @@
 
 <script lang="ts">
 import {computed, defineComponent, PropType} from "vue";
-import {UiState} from "@/composables/UiState";
+import {UiState} from "@/composables/UiType";
 import {mdiMagnify, mdiNearMe, mdiClose} from "@mdi/js";
 
 export default defineComponent({

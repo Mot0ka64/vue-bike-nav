@@ -3,39 +3,28 @@
     <svg class="arrow" viewBox="0 0 24 24" :style="arrowStyle">
       <path :d="mdiArrowUp"/>
     </svg>
-    <h3 class="description">{{ description }} へ</h3>
-    <h3 class="rem-dist-on-step">{{ remDistOnStep.toFixed(1) }} m</h3>
+    <h3 class="description">{{ data.description }} へ</h3>
+    <h3 class="rem-dist-on-step">{{ data.remainingDistanceOnStep.toFixed(1) }} m</h3>
     <h4 class="dest-description">目的地まで</h4>
-    <h4 class="rem-dist">{{ (remDist / 1e3).toFixed(2) }} km</h4>
+    <h4 class="rem-dist">{{ (data.remainingDistance / 1e3).toFixed(2) }} km</h4>
   </div>
 </template>
 
 <script lang="ts">
 import {computed, defineComponent, PropType} from "vue";
 import {mdiArrowUp} from '@mdi/js';
+import {NavigationData} from "@/composables/UiType";
 
 export default defineComponent({
   props: {
-    description: {
-      type: String as PropType<string>,
-      default: ""
-    },
-    remDistOnStep: {
-      type: Number as PropType<number>,
-      default: 0.0
-    },
-    remDist: {
-      type: Number as PropType<number>,
-      default: 0.0
-    },
-    bearing: {
-      type: Number as PropType<number>,
-      default: 0.0
+    data: {
+      type: Object as PropType<NavigationData>,
+      required: true
     },
   },
   setup(props) {
     const arrowStyle = computed(() => ({
-      '--bearing': `rotate(${props.bearing}deg)`
+      '--bearing': `rotate(${props.data.bearing}deg)`
     }));
 
     return {mdiArrowUp, arrowStyle}

@@ -1,1 +1,0 @@
-export type UiState = "Search" | "Summary" | "Navigation";

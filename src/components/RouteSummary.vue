@@ -1,26 +1,23 @@
 <template>
   <div class="summary-container">
-    <h3 class="summary">{{ summary }}</h3>
+    <h3 class="summary">{{ data.summary }}</h3>
     <h4 class="distance">{{ distKm }}</h4>
   </div>
 </template>
 
 <script lang="ts">
 import {computed, defineComponent, PropType} from "vue";
+import {SummaryData} from "@/composables/UiType";
 
 export default defineComponent({
   props: {
-    summary: {
-      type: String as PropType<string>,
-      default: ""
-    },
-    distance: {
-      type: Number as PropType<number>,
+    data: {
+      type: Object as PropType<SummaryData>,
       required: true
-    }
+    },
   },
   setup(prop) {
-    const distKm = computed(() => `${(prop.distance / 1000).toFixed(2)} km`);
+    const distKm = computed(() => `${(prop.data.distance / 1000).toFixed(2)} km`);
 
     return {distKm}
   }
