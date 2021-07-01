@@ -1,7 +1,0 @@
-{
-  "use": "@vercel/node@latest",
-  "src": "api/search.ts",
-  "config": {
-    "zeroConfig": true
-  }
-}

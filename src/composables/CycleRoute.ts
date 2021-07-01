@@ -8,7 +8,7 @@ export interface CycleRoute {
     routes: Route[];
 }
 
-function fetchCycleRoute (lls: LngLat[], callback: (route: CycleRoute | null) => void): void {
+function fetchCycleRoute(lls: LngLat[], callback: (route: CycleRoute | null) => void): void {
     if (lls.length < 2) callback(null);
     const client = axios.create({
         baseURL: "https://cycle-route.tk/route/",

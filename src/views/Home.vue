@@ -12,6 +12,9 @@
       <RouteNavigation v-if="uiState === 'Navigation'" :data="navData"/>
     </transition>
     <FloatingActionButton color="teal" bottom="40px" @clicked="onFabClick" :uiState="uiState"/>
+    <OverlayModal v-if="modalVisible" @close="onModalClose">
+      <LocationSearch :location="location" @result="onSearchResult"/>
+    </OverlayModal>
   </div>
 </template>
 
@@ -29,9 +32,14 @@ import {RouteResults} from "osrm";
 import {NavigationData, SummaryData, UiState} from "@/composables/UiType";
 import RouteManager from "@/composables/RouteManager";
 import RouteNavigation from "@/components/RouteNavigation.vue";
+import OverlayModal from "@/components/ui/OverlayModal.vue";
+import LocationSearch from "@/components/LocationSearch.vue";
+import {SearchResult} from "@/composables/CompoundSearch";
 
 export default defineComponent({
   components: {
+    LocationSearch,
+    OverlayModal,
     RouteNavigation,
     FloatingActionButton,
     MapboxGeoJsonSource,
@@ -47,6 +55,7 @@ export default defineComponent({
     const routeIndex = ref(0);
     const markerText = ref("");
     const uiState = ref<UiState>("Search");
+    const modalVisible = ref(false);
 
     const navData = ref<NavigationData>({
       description: "",
@@ -77,6 +86,7 @@ export default defineComponent({
     const onFabClick = () => {
       switch (uiState.value) {
         case "Search":
+          modalVisible.value = true;
           break;
         case "Summary":
           if (routeResults.value) routeManager = new RouteManager(routeResults.value.routes[routeIndex.value]);
@@ -92,6 +102,16 @@ export default defineComponent({
     const onLayerClick = (bool: boolean) => {
       if (uiState.value === "Search" && bool) uiState.value = "Summary";
       if (uiState.value === "Summary" && (!bool)) uiState.value = "Search";
+    }
+
+    const onModalClose = () => {
+      modalVisible.value = false;
+    }
+
+    const onSearchResult = (result: SearchResult) => {
+      modalVisible.value = false;
+      markerText.value = result.name;
+      lngLat.value = new mapboxgl.LngLat(result.lngLat[0], result.lngLat[1]);
     }
 
     function updateLocation() {
@@ -122,7 +142,7 @@ export default defineComponent({
       return routeResults.value?.routes[routeIndex.value];
     });
 
-    const summaryData = computed<SummaryData>( () => ({
+    const summaryData = computed<SummaryData>(() => ({
       summary: route.value?.legs?.map(leg => leg.summary).join(",") ?? "",
       distance: route.value?.distance ?? 0
     }));
@@ -133,10 +153,10 @@ export default defineComponent({
     });
 
     return {
-      onMapClick, onLocation, onFabClick, onLayerClick,
+      onMapClick, onLocation, onFabClick, onLayerClick, onModalClose, onSearchResult,
       lngLat, markerText, location, routeResults, uiState,
       summaryData, coordinates, navData,
-      
+      modalVisible,
     };
   }
 })
