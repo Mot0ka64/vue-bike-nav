@@ -1,0 +1,8 @@
+{
+  "name": "自転車ナビ",
+  "short_name": "bike-nav",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#008080"
+}
