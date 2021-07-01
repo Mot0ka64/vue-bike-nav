@@ -3,7 +3,7 @@
     <svg class="arrow" viewBox="0 0 24 24" :style="arrowStyle">
       <path :d="mdiArrowUp"/>
     </svg>
-    <h3 class="description">{{ data.description }} へ</h3>
+    <h3 v-show="data.description" class="description">{{ data.description }} へ</h3>
     <h3 class="rem-dist-on-step">{{ data.remainingDistanceOnStep.toFixed(1) }} m</h3>
     <h4 class="dest-description">目的地まで</h4>
     <h4 class="rem-dist">{{ (data.remainingDistance / 1e3).toFixed(2) }} km</h4>
@@ -40,7 +40,7 @@ export default defineComponent({
   top: 20px;
   border: 1px solid black;
   border-radius: 10px;
-  height: 110px;
+  height: 95px;
   background-color: white;
 }
 

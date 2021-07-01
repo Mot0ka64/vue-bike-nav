@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <Mapbox @context-menu="onMapClick">
+    <Mapbox @click="onMapClick" @context-menu="onMapLocation" :camera="mapCamera">
       <MapboxMarker v-if="lngLat" :lng-lat="lngLat" :text="markerText" @click="onLayerClick"/>
       <MapboxGeoJsonSource v-if="routeResults" :coordinates="coordinates" id="route" @click="onLayerClick"/>
       <MapboxGeolocation @located="onLocation" :track-user-location="true" :max-zoom="11"/>
@@ -21,7 +21,7 @@
 <script lang="ts">
 import {computed, defineComponent, ref, watch} from "vue";
 import Mapbox from "@/components/mapbox/Mapbox.vue";
-import mapboxgl, {MapMouseEvent} from "mapbox-gl";
+import mapboxgl, {CameraOptions, MapMouseEvent} from "mapbox-gl";
 import MapboxMarker from "@/components/mapbox/MapboxMarker.vue";
 import MapboxGeolocation from "@/components/mapbox/MapboxGeolocation.vue";
 import MapboxGeoJsonSource from "@/components/mapbox/MapboxGeoJsonSource.vue";
@@ -56,6 +56,10 @@ export default defineComponent({
     const markerText = ref("");
     const uiState = ref<UiState>("Search");
     const modalVisible = ref(false);
+    const mapCamera = ref<CameraOptions>({
+      center: new mapboxgl.LngLat(139.8, 35.75),
+      zoom: 10
+    });
 
     const navData = ref<NavigationData>({
       description: "",
@@ -66,12 +70,16 @@ export default defineComponent({
 
     let routeManager: RouteManager | null = null;
 
-    const onMapClick = (e: MapMouseEvent) => {
+    const onMapLocation = (e: MapMouseEvent) => {
       uiState.value = "Search";
       if (window.confirm(`[${e.lngLat.lng.toFixed(6)}, ${e.lngLat.lat.toFixed(6)}] に変更しますか？`)) {
         lngLat.value = e.lngLat;
         markerText.value = e.lngLat.toString();
       }
+    }
+
+    const onMapClick = () => {
+      if (uiState.value === "Summary") uiState.value = "Search";
     }
 
     // eslint-disable-next-line no-undef
@@ -123,6 +131,11 @@ export default defineComponent({
           remainingDistanceOnStep: routeManager?.remainingDistanceOnStep() ?? 0.0,
           bearing: routeManager?.nextBearing() ?? 0.0
         }
+
+        mapCamera.value = {
+          bearing: -((routeManager?.bearing() ?? 0.0) / Math.PI * 180.0 - 90.0),
+          center: location.value,
+        }
       }
     }
 
@@ -153,8 +166,8 @@ export default defineComponent({
     });
 
     return {
-      onMapClick, onLocation, onFabClick, onLayerClick, onModalClose, onSearchResult,
-      lngLat, markerText, location, routeResults, uiState,
+      onMapLocation, onMapClick, onLocation, onFabClick, onLayerClick, onModalClose, onSearchResult,
+      mapCamera, lngLat, markerText, location, routeResults, uiState,
       summaryData, coordinates, navData,
       modalVisible,
     };
